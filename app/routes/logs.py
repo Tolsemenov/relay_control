@@ -1,31 +1,32 @@
 # app/routes/logs.py
 
-from flask import Blueprint, render_template, request
-from app.db.database import SessionLocal
+from quart import Blueprint, render_template, request
+from sqlalchemy import select, desc
+from app.db.database import AsyncSessionLocal
 from app.db.models import Log
-from sqlalchemy import desc
 
 logs_bp = Blueprint("logs", __name__)
 
 @logs_bp.route("/logs")
-def logs():
-    session = SessionLocal()
-
-    # Фильтрация по уровню, действию и цели (если переданы в URL)
+async def logs():
+    # Получаем фильтры из запроса
     level = request.args.get("level")
     action = request.args.get("action")
     target = request.args.get("target")
 
-    query = session.query(Log)
+    async with AsyncSessionLocal() as session:
+        stmt = select(Log)
 
-    if level:
-        query = query.filter(Log.level == level)
-    if action:
-        query = query.filter(Log.action == action)
-    if target:
-        query = query.filter(Log.target == target)
+        if level:
+            stmt = stmt.where(Log.level == level)
+        if action:
+            stmt = stmt.where(Log.action == action)
+        if target:
+            stmt = stmt.where(Log.target == target)
 
-    logs = query.order_by(desc(Log.timestamp)).limit(100).all()
-    session.close()
+        stmt = stmt.order_by(desc(Log.timestamp)).limit(100)
 
-    return render_template("logs.html", logs=logs)
+        result = await session.execute(stmt)
+        logs = result.scalars().all()
+
+    return await render_template("logs.html", logs=logs)

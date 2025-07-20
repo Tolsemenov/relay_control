@@ -1,10 +1,11 @@
 # app/scheduler.py
 
+import asyncio
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from datetime import datetime, timedelta
 
-from app.db.database import SessionLocal
+from app.db.database import AsyncSessionLocal
 from app.db.models import Schedule, RelayTarget
 from app.gpio.relay_controller import RelayController
 from app.logs.logger_helper import log_event
@@ -15,9 +16,9 @@ scheduler = BackgroundScheduler()
 def schedule_task(schedule: Schedule):
     """Создаёт задачу в планировщике по записи из БД"""
 
-    def task_on():
-        controller.turn_on(schedule.target)
-        log_event(
+    async def task_on():
+        await controller.turn_on(schedule.target)
+        await log_event(
             "INFO",
             f"Реле {schedule.target.value} включено по расписанию (id={schedule.id})",
             target=schedule.target,
@@ -26,16 +27,16 @@ def schedule_task(schedule: Schedule):
 
         # Планируем выключение через N минут
         scheduler.add_job(
-            lambda: task_off(),
+            lambda: asyncio.create_task(task_off()),
             trigger='date',
             run_date=datetime.now() + timedelta(minutes=schedule.duration_min),
             id=f"off_{schedule.id}",
             replace_existing=True
         )
 
-    def task_off():
-        controller.turn_off(schedule.target)
-        log_event(
+    async def task_off():
+        await controller.turn_off(schedule.target)
+        await log_event(
             "INFO",
             f"Реле {schedule.target.value} выключено автоматически (id={schedule.id})",
             target=schedule.target,
@@ -56,27 +57,31 @@ def schedule_task(schedule: Schedule):
         minute=schedule.time_on.minute
     )
 
+    # Добавляем задачу в планировщик как асинхронную
     scheduler.add_job(
-        func=task_on,
+        func=lambda: asyncio.create_task(task_on()),
         trigger=trigger,
         id=str(schedule.id),
         replace_existing=True
     )
 
-def load_schedules_from_db():
+async def load_schedules_from_db():
     """Загружает все активные расписания и регистрирует их в APScheduler"""
-    session = SessionLocal()
-    schedules = session.query(Schedule).filter_by(enabled=True).all()
-    session.close()
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(
+            Schedule.__table__.select().where(Schedule.enabled == True)
+        )
+        rows = result.fetchall()
+        for row in rows:
+            try:
+                # Преобразуем в объект Schedule вручную (или используй ORM если нужно)
+                sched = Schedule(**row._mapping)
+                schedule_task(sched)
+            except Exception as e:
+                await log_event("ERROR", f"Ошибка при регистрации задачи {row.id}: {e}", target=row.target)
 
-    for sched in schedules:
-        try:
-            schedule_task(sched)
-        except Exception as e:
-            log_event("ERROR", f"Ошибка при регистрации задачи {sched.id}: {e}", target=sched.target)
-
-def start_scheduler():
+async def start_scheduler():
     """Запускает планировщик"""
-    load_schedules_from_db()
+    await load_schedules_from_db()
     scheduler.start()
-    log_event("INFO", "Планировщик задач запущен", action="SCHEDULER_START")
+    await log_event("INFO", "Планировщик задач запущен", action="SCHEDULER_START")
