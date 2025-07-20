@@ -1,61 +1,34 @@
 import asyncio
-from quart import Quart, session, redirect, url_for, request
-
 from app.db.database import init_db
-from app.logs.logger_helper import log_event
-from app.routes.logs import logs_bp
-from app.routes.auth import auth_bp
-from app.routes.dashboard import dashboard_bp
-from app.scheduler import start_scheduler
-from app.wifi_setup.wifi_manager import is_wifi_connected, stop_access_point, start_access_point, run_flask_web
+from app.wifi_setup.button_listener import start_button_listener
+from app.wifi_setup.web_server import app
 
-app = Quart(__name__)
-app.config['SECRET_KEY'] = 'замени_на_случайный_ключ'
+from app.wifi_setup.wifi_manager import is_wifi_connected, start_access_point, run_flask_web
 
-# Регистрация blueprints
-app.register_blueprint(auth_bp)
-app.register_blueprint(dashboard_bp)
-app.register_blueprint(logs_bp)
+from hypercorn.asyncio import serve
+from hypercorn.config import Config
 
 
-@app.before_request
-def require_login():
-    if not session.get("logged_in") and not request.path.startswith("/login"):
-        return redirect(url_for("auth.login"))
-
-
-@app.route("/")
-def home():
-    return redirect(url_for("dashboard.dashboard"))
 
 
 async def start_main_web_server():
-    """
-    Асинхронная инициализация БД и запуск Flask-приложения.
-    """
-    await init_db()
-    await log_event("INFO", "Сервер стартует", action="APP_START")
-    await start_scheduler()
-
-    # Flask работает синхронно → запуск отдельно
-    app.run(host="0.0.0.0", port=5000)
+    config = Config()
+    config.bind = ["0.0.0.0:5000"]
+    await serve(app, config)
 
 
 async def main():
-    if is_wifi_connected():
-        print("✅ Wi-Fi подключён")
-        stop_access_point()
-        await start_main_web_server()
-    else:
-        print("❌ Wi-Fi не подключён. Поднимаем точку доступа для настройки...")
-        start_access_point()
-        run_flask_web()  # отдельный Flask на порту 80 (может быть sync)
 
+    await init_db()
+    start_button_listener()
+
+    # if not is_wifi_connected():
+    #     print("❌ Wi-Fi не подключён. Поднимаем точку доступа для настройки...")
+    #     await start_access_point()
+    #     await run_flask_web()  # Flask-сервер на порту 80
+    # else:
+    #     await start_main_web_server()  # Quart-сервер на порту 5000
+    await start_main_web_server()  # Quart-сервер на порту 5000
 
 if __name__ == "__main__":
-    try:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        loop.run_until_complete(main())
-    except KeyboardInterrupt:
-        pass
+    asyncio.run(main())
