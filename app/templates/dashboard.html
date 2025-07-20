@@ -17,10 +17,13 @@
             <strong>Длительность:</strong> {{ s.duration_min }} мин<br>
             <strong>Вкл:</strong> {% if s.enabled %}✅{% else %}❌{% endif %}
           </p>
-          <div class="d-flex justify-content-end">
-            <a href="{{ url_for('dashboard.edit_schedule', schedule_id=s.id) }}" class="btn btn-primary btn-sm me-2">✏️</a>
-            <a href="{{ url_for('dashboard.delete_schedule', schedule_id=s.id) }}" class="btn btn-danger btn-sm"
+          <div class="d-flex flex-wrap gap-2 justify-content-end">
+            <a href="{{ url_for('dashboard.edit_schedule', schedule_id=s.id) }}" class="btn btn-primary btn-sm">✏️</a>
+            <a href="{{ url_for('dashboard.delete_schedule', schedule_id=s.id) }}"
+               class="btn btn-danger btn-sm"
                onclick="return confirm('Удалить задачу {{ s.id }}?');">🗑️</a>
+            <a href="{{ url_for('dashboard.toggle_schedule', schedule_id=s.id) }}"
+               class="btn btn-secondary btn-sm">🔁</a>
           </div>
         </div>
       </div>
@@ -28,7 +31,7 @@
     </div>
 
     <!-- Десктопная таблица -->
-    <div class="table-responsive">
+    <div class="table-responsive d-none d-md-block">
       <table class="table table-bordered table-hover">
          <thead class="table-light">
           <tr>
@@ -51,14 +54,15 @@
             <td>{{ s.duration_min }}</td>
             <td>{% if s.enabled %}✅{% else %}❌{% endif %}</td>
             <td>
-  <div class="d-flex flex-wrap gap-2">
-    <a href="{{ url_for('dashboard.edit_schedule', schedule_id=s.id) }}" class="btn btn-sm btn-primary">✏️</a>
-    <a href="{{ url_for('dashboard.delete_schedule', schedule_id=s.id) }}"
-       class="btn btn-sm btn-danger"
-       onclick="return confirm('Удалить задачу {{ s.id }}?');">🗑️</a>
-    <a href="{{ url_for('dashboard.toggle_schedule', schedule_id=s.id) }}" class="btn btn-sm btn-secondary">🔁</a>
-  </div>
-</td>
+              <div class="d-flex flex-wrap gap-2">
+                <a href="{{ url_for('dashboard.edit_schedule', schedule_id=s.id) }}" class="btn btn-sm btn-primary">✏️</a>
+                <a href="{{ url_for('dashboard.delete_schedule', schedule_id=s.id) }}"
+                   class="btn btn-sm btn-danger"
+                   onclick="return confirm('Удалить задачу {{ s.id }}?');">🗑️</a>
+                <a href="{{ url_for('dashboard.toggle_schedule', schedule_id=s.id) }}"
+                   class="btn btn-sm btn-secondary">🔁</a>
+              </div>
+            </td>
           </tr>
           {% endfor %}
         </tbody>
