@@ -130,3 +130,20 @@ async def delete_schedule(schedule_id):
     load_schedules_from_db()
     await flash("Задача удалена", "info")
     return redirect(url_for("dashboard.dashboard"))
+
+@dashboard_bp.route("/toggle_schedule/<int:schedule_id>")
+async def toggle_schedule(schedule_id):
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(select(Schedule).where(Schedule.id == schedule_id))
+        schedule = result.scalar()
+
+        if schedule:
+            schedule.enabled = not schedule.enabled
+            await session.commit()
+
+            action = "TASK_ENABLED" if schedule.enabled else "TASK_DISABLED"
+            status = "включено" if schedule.enabled else "отключено"
+            await log_event("INFO", f"Расписание ID={schedule.id} {status}", target=schedule.target.value, action=action)
+
+    await load_schedules_from_db()
+    return redirect(url_for("dashboard.dashboard"))

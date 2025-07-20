@@ -1,6 +1,6 @@
 # app/routes/auth.py
 
-from flask import Blueprint, render_template, request, redirect, url_for, session
+from quart import Blueprint, render_template, request, redirect, url_for, session
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -9,19 +9,19 @@ USERNAME = "admin"
 PASSWORD = "1234"
 
 @auth_bp.route("/login", methods=["GET", "POST"])
-def login():
+async def login():
     if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
+        form = await request.form
+        username = form.get("username")
+        password = form.get("password")
         if username == USERNAME and password == PASSWORD:
             session["logged_in"] = True
             return redirect(url_for("dashboard.dashboard"))
         else:
-            return render_template("login.html", error="Неверный логин или пароль")
-    return render_template("login.html")
-
+            return await render_template("login.html", error="Неверный логин или пароль")
+    return await render_template("login.html")
 
 @auth_bp.route("/logout")
-def logout():
+async def logout():
     session.clear()
     return redirect(url_for("auth.login"))

@@ -1,42 +1,69 @@
 {% extends "base.html" %}
-
 {% block content %}
 <div class="container mt-4">
   <h3>📅 Расписание автополива</h3>
   <a href="{{ url_for('dashboard.add_schedule') }}" class="btn btn-success btn-sm mb-3">➕ Добавить задачу</a>
 
   {% if schedules %}
-    <table class="table table-bordered table-hover">
-      <thead class="table-light">
-        <tr>
-          <th>ID</th>
-          <th>Реле</th>
-          <th>Дни</th>
-          <th>Время</th>
-          <th>Длительность (мин)</th>
-          <th>Вкл.</th>
-          <th>Действия</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for s in schedules %}
-        <tr>
-          <td>{{ s.id }}</td>
-          <td>{{ s.target.value }}</td>
-          <td>{{ s.days }}</td>
-          <td>{{ s.time_on.strftime('%H:%M') }}</td>
-          <td>{{ s.duration_min }}</td>
-          <td>{% if s.enabled %}✅{% else %}❌{% endif %}</td>
-          <td>
-            <a href="{{ url_for('dashboard.edit_schedule', schedule_id=s.id) }}" class="btn btn-sm btn-primary">✏️</a>
-            <a href="{{ url_for('dashboard.delete_schedule', schedule_id=s.id) }}"
-               class="btn btn-sm btn-danger"
+    <!-- Мобильная версия -->
+    <div class="d-block d-md-none">
+      {% for s in schedules %}
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title">{{ s.target.value }}</h5>
+          <p class="card-text">
+            <strong>Дни:</strong> {{ s.days }}<br>
+            <strong>Время:</strong> {{ s.time_on.strftime('%H:%M') }}<br>
+            <strong>Длительность:</strong> {{ s.duration_min }} мин<br>
+            <strong>Вкл:</strong> {% if s.enabled %}✅{% else %}❌{% endif %}
+          </p>
+          <div class="d-flex justify-content-end">
+            <a href="{{ url_for('dashboard.edit_schedule', schedule_id=s.id) }}" class="btn btn-primary btn-sm me-2">✏️</a>
+            <a href="{{ url_for('dashboard.delete_schedule', schedule_id=s.id) }}" class="btn btn-danger btn-sm"
                onclick="return confirm('Удалить задачу {{ s.id }}?');">🗑️</a>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Десктопная таблица -->
+    <div class="table-responsive d-none d-md-block">
+      <table class="table table-bordered table-hover">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Реле</th>
+            <th>Дни</th>
+            <th>Время</th>
+            <th>Длительность (мин)</th>
+            <th>Вкл.</th>
+            <th>Действия</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in schedules %}
+          <tr>
+            <td>{{ s.id }}</td>
+            <td>{{ s.target.value }}</td>
+            <td>{{ s.days }}</td>
+            <td>{{ s.time_on.strftime('%H:%M') }}</td>
+            <td>{{ s.duration_min }}</td>
+            <td>{% if s.enabled %}✅{% else %}❌{% endif %}</td>
+            <td class="d-flex gap-1">
+              <a href="{{ url_for('dashboard.edit_schedule', schedule_id=s.id) }}" class="btn btn-sm btn-primary" title="Редактировать">✏️</a>
+              <a href="{{ url_for('dashboard.toggle_schedule', schedule_id=s.id) }}" class="btn btn-sm {% if s.enabled %}btn-warning{% else %}btn-success{% endif %}" title="Изменить статус">
+                {% if s.enabled %}🚫{% else %}✅{% endif %}
+              </a>
+              <a href="{{ url_for('dashboard.delete_schedule', schedule_id=s.id) }}"
+                 class="btn btn-sm btn-danger"
+                 onclick="return confirm('Удалить задачу {{ s.id }}?');">🗑️</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   {% else %}
     <p class="text-muted">Пока нет заданий в расписании.</p>
   {% endif %}
