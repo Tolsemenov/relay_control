@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+  <h3>📅 Расписание автополива</h3>
+  <a href="{{ url_for('dashboard.add_schedule') }}" class="btn btn-success btn-sm mb-3">➕ Добавить задачу</a>
+
+  {% if schedules %}
+    <table class="table table-bordered table-hover">
+      <thead class="table-light">
+        <tr>
+          <th>ID</th>
+          <th>Реле</th>
+          <th>Дни</th>
+          <th>Время</th>
+          <th>Длительность (мин)</th>
+          <th>Вкл.</th>
+          <th>Действия</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in schedules %}
+        <tr>
+          <td>{{ s.id }}</td>
+          <td>{{ s.target.value }}</td>
+          <td>{{ s.days }}</td>
+          <td>{{ s.time_on.strftime('%H:%M') }}</td>
+          <td>{{ s.duration_min }}</td>
+          <td>{% if s.enabled %}✅{% else %}❌{% endif %}</td>
+          <td>
+            <a href="{{ url_for('dashboard.edit_schedule', schedule_id=s.id) }}" class="btn btn-sm btn-primary">✏️</a>
+            <a href="{{ url_for('dashboard.delete_schedule', schedule_id=s.id) }}"
+               class="btn btn-sm btn-danger"
+               onclick="return confirm('Удалить задачу {{ s.id }}?');">🗑️</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="text-muted">Пока нет заданий в расписании.</p>
+  {% endif %}
+</div>
+{% endblock %}

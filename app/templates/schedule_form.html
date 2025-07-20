@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4" style="max-width: 600px;">
+  <h4 class="mb-3">➕ Добавить расписание</h4>
+  <form method="post">
+    <div class="mb-3">
+      <label class="form-label">Реле</label>
+      <select name="target" class="form-select" required>
+        {% for t in targets %}
+        <option value="{{ t.value }}">{{ t.value }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Дни недели</label>
+      <div class="d-flex flex-wrap">
+        {% set week_days = [("Mon", "Пн"), ("Tue", "Вт"), ("Wed", "Ср"), ("Thu", "Чт"), ("Fri", "Пт"), ("Sat", "Сб"), ("Sun", "Вс")] %}
+        {% for value, label in week_days %}
+        <div class="form-check me-3 mb-2">
+          <input class="form-check-input" type="checkbox" name="days" id="day_{{ value }}" value="{{ value }}">
+          <label class="form-check-label" for="day_{{ value }}">{{ label }}</label>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="row mb-3">
+  <div class="col-auto">
+    <label class="form-label">Время включения</label><br>
+    <select name="hour_on" class="form-select form-select-sm d-inline-block" style="width: 80px;" required>
+      <option value="">Часы</option>
+      {% for h in range(0, 24) %}
+      <option value="{{ h }}">{{ "%02d"|format(h) }}</option>
+      {% endfor %}
+    </select>
+    <select name="minute_on" class="form-select form-select-sm d-inline-block" style="width: 100px;" required>
+      <option value="">Минуты</option>
+      {% for m in range(0, 60, 5) %}
+      <option value="{{ m }}">{{ "%02d"|format(m) }}</option>
+      {% endfor %}
+    </select>
+  </div>
+</div>
+
+    <div class="row mb-3">
+  <div class="col-auto">
+    <label class="form-label">Длительность</label><br>
+    <select name="duration_hour" class="form-select form-select-sm d-inline-block" style="width: 80px;" required>
+      <option value="">Часы</option>
+      {% for h in range(0, 6) %}
+      <option value="{{ h }}">{{ h }}</option>
+      {% endfor %}
+    </select>
+    <select name="duration_minute" class="form-select form-select-sm d-inline-block" style="width: 100px;" required>
+      <option value="">Минуты</option>
+      {% for m in range(0, 60, 5) %}
+      <option value="{{ m }}">{{ m }}</option>
+      {% endfor %}
+    </select>
+  </div>
+</div>
+
+    <div class="form-check mb-3">
+      <input class="form-check-input" type="checkbox" name="enabled" id="enabled" checked>
+      <label class="form-check-label" for="enabled">Включено</label>
+    </div>
+
+    <button type="submit" class="btn btn-success w-100">💾 Сохранить</button>
+  </form>
+</div>
+{% endblock %}

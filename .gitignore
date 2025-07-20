@@ -1,0 +1,8 @@
+# Игнорировать всё в logs/
+logs/*
+
+# Но оставить файл handler_log.py
+!logs/handler_log.py
+
+
+db/*.db
