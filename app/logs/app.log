@@ -1,0 +1,40 @@
+[2025-07-19 21:35:58] [WARNING] autowater: [WARNING] GPIO недоступен — реле не будут управляться
+[2025-07-19 21:35:58] [ERROR] autowater: Ошибка записи лога в БД: (sqlite3.OperationalError) no such table: logs
+[SQL: INSERT INTO logs (target, level, action, message, timestamp) VALUES (?, ?, ?, ?, ?)]
+[parameters: (None, 'WARNING', 'INIT', 'GPIO недоступен — реле не будут управляться', '2025-07-19 18:35:58.683556')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+[2025-07-19 21:35:58] [INFO] autowater: Сервер стартует
+[2025-07-19 21:35:58] [ERROR] autowater: Ошибка записи лога в БД: (sqlite3.OperationalError) no such table: logs
+[SQL: INSERT INTO logs (target, level, action, message, timestamp) VALUES (?, ?, ?, ?, ?)]
+[parameters: (None, 'INFO', 'APP_START', 'Сервер стартует', '2025-07-19 18:35:58.697100')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+[2025-07-19 21:44:00] [WARNING] autowater: [WARNING] GPIO недоступен — реле не будут управляться
+[2025-07-19 21:44:00] [ERROR] autowater: Ошибка записи лога в БД: (sqlite3.OperationalError) no such table: logs
+[SQL: INSERT INTO logs (target, level, action, message, timestamp) VALUES (?, ?, ?, ?, ?)]
+[parameters: (None, 'WARNING', 'INIT', 'GPIO недоступен — реле не будут управляться', '2025-07-19 18:44:00.844957')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+[2025-07-19 21:44:00] [INFO] autowater: Сервер стартует
+[2025-07-19 21:44:00] [ERROR] autowater: Ошибка записи лога в БД: (sqlite3.OperationalError) no such table: logs
+[SQL: INSERT INTO logs (target, level, action, message, timestamp) VALUES (?, ?, ?, ?, ?)]
+[parameters: (None, 'INFO', 'APP_START', 'Сервер стартует', '2025-07-19 18:44:00.854351')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+[2025-07-19 21:44:50] [WARNING] autowater: [WARNING] GPIO недоступен — реле не будут управляться
+[2025-07-19 21:44:50] [ERROR] autowater: Ошибка записи лога в БД: (sqlite3.OperationalError) no such table: logs
+[SQL: INSERT INTO logs (target, level, action, message, timestamp) VALUES (?, ?, ?, ?, ?)]
+[parameters: (None, 'WARNING', 'INIT', 'GPIO недоступен — реле не будут управляться', '2025-07-19 18:44:50.835044')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+[2025-07-19 21:44:50] [INFO] autowater: Сервер стартует
+[2025-07-19 21:44:50] [ERROR] autowater: Ошибка записи лога в БД: (sqlite3.OperationalError) no such table: logs
+[SQL: INSERT INTO logs (target, level, action, message, timestamp) VALUES (?, ?, ?, ?, ?)]
+[parameters: (None, 'INFO', 'APP_START', 'Сервер стартует', '2025-07-19 18:44:50.843049')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+[2025-07-19 22:51:26] [WARNING] autowater: [WARNING] GPIO недоступен — реле не будут управляться
+[2025-07-19 22:51:26] [ERROR] autowater: Ошибка записи лога в БД: (sqlite3.OperationalError) no such table: logs
+[SQL: INSERT INTO logs (target, level, action, message, timestamp) VALUES (?, ?, ?, ?, ?)]
+[parameters: (None, 'WARNING', 'INIT', 'GPIO недоступен — реле не будут управляться', '2025-07-19 19:51:26.589812')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+[2025-07-19 22:51:26] [INFO] autowater: Сервер стартует
+[2025-07-19 22:51:26] [ERROR] autowater: Ошибка записи лога в БД: (sqlite3.OperationalError) no such table: logs
+[SQL: INSERT INTO logs (target, level, action, message, timestamp) VALUES (?, ?, ?, ?, ?)]
+[parameters: (None, 'INFO', 'APP_START', 'Сервер стартует', '2025-07-19 19:51:26.604662')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
