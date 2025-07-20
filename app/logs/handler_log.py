@@ -10,7 +10,7 @@ ERROR_LOG = os.path.join(LOG_DIR, "error.log")
 
 # Ограничения:
 MAX_LOG_SIZE = 1 * 1024 * 1024  # 1 МБ
-BACKUP_COUNT = 3  # Сколько копий хранить: app.log.1, app.log.2 и т.д.
+BACKUP_COUNT = 3  # Сколько копий хранить: app.log.1, app.log.2 и т.д.вв
 
 def setup_logger(name: str) -> logging.Logger:
     logger = logging.getLogger(name)

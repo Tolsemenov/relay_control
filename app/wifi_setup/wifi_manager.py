@@ -15,7 +15,7 @@ def is_wifi_connected():
 
 
 def log_async(level: str, message: str, action: str = "", target: str = None):
-    """Безопасная обёртdfка для вызова асинхронного логирования из синхронного кода"""
+    """Безопасная обёртка для вызова асинхронного логирования из синхронного кода"""
     try:
         asyncio.run(log_event(level, message, action, target))
     except RuntimeError:
