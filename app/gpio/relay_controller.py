@@ -1,11 +1,9 @@
-# app/gpio/relay_controller.py
-
 try:
-    import OPi.GPIO as GPIO
+    import RPi.GPIO as GPIO
     GPIO.setmode(GPIO.BOARD)
     GPIO_AVAILABLE = True
 except ImportError:
-    print("[DEBUG] GPIO не поддерживается в этой системе (Windows?)")
+    print("[DEBUG] GPIO не поддерживается в этой системе (возможно, не Raspberry Pi)")
     GPIO_AVAILABLE = False
 
 from app.db.models import RelayTarget
@@ -22,10 +20,12 @@ class RelayController:
 
     def __init__(self):
         if GPIO_AVAILABLE:
-            GPIO.setmode(GPIO.BOARD)
             for pin in self.relay_pins.values():
-                GPIO.setup(pin, GPIO.OUT)
-                GPIO.output(pin, GPIO.HIGH)  # OFF
+                try:
+                    GPIO.setup(pin, GPIO.OUT)
+                    GPIO.output(pin, GPIO.HIGH)  # OFF
+                except Exception as e:
+                    print(f"[ERROR] Не удалось инициализировать пин {pin}: {e}")
 
     async def async_init(self):
         if GPIO_AVAILABLE:
