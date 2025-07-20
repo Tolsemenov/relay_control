@@ -1,9 +1,11 @@
-# Игнорировать всё в logs/
+# Игнорировать всё в logs/, кроме самой папки и handler_log.py
 logs/*
-
-# Но оставить файл handler_log.py
+!logs/
 !logs/handler_log.py
+!logs/logger_helper.py
 
-
+# Игнорировать .db файлы в db/
 db/*.db
-.venv/*
+
+# Игнорировать виртуальное окружение
+.venv/
