@@ -9,10 +9,10 @@ Base = declarative_base()
 
 class RelayTarget(str, enum.Enum):
     """Назначение каждого реле (реле1 = насос, реле2 = кран и т.д.)"""
-    PUMP = "pump"
     VALVE1 = "valve1"
     VALVE2 = "valve2"
     VALVE3 = "valve3"
+    VALVE4 = "valve4"
 
 class Schedule(Base):
     """Расписание для включения реле"""
@@ -34,3 +34,12 @@ class Log(Base):
     action = Column(String, nullable=True)
     message = Column(String, nullable=False)
     timestamp = Column(DateTime, default=datetime.utcnow)
+
+
+class RelayName(Base):
+    __tablename__ = "relay_names"
+
+    id = Column(Integer, primary_key=True, index=True)
+    relay_key = Column(String, unique=True, nullable=False)  # valve1, valve2, ...
+    name = Column(String, nullable=False)  # Название реле: "Насос", "Розетка"
+    status = Column(Boolean, default=False)  # Включено или выключено

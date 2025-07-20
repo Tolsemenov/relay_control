@@ -6,7 +6,7 @@ from datetime import datetime
 from app.db.database import AsyncSessionLocal
 from app.logs.logger_helper import log_event
 from app.scheduler import load_schedules_from_db
-from app.db.models import RelayTarget, Schedule
+from app.db.models import Schedule, RelayName, RelayTarget
 from sqlalchemy.future import select
 
 dashboard_bp = Blueprint("dashboard", __name__)
@@ -17,11 +17,15 @@ async def dashboard():
         result = await session.execute(select(Schedule))
         schedules = result.scalars().all()
 
-    day_map = {'Mon': 'пн', 'Tue': 'вт', 'Wed': 'ср', 'Thu': 'чт', 'Fri': 'пт', 'Sat': 'сб', 'Sun': 'вс'}
+        # Получить имена реле из базы
+        relay_result = await session.execute(select(RelayName))
+        relay_names = {r.relay_key: r.name for r in relay_result.scalars()}
+
+    day_map = {'Mon': 'пн', 'Tue': 'Вт', 'Wed': 'ср', 'Thu': 'чт', 'Fri': 'пт', 'Sat': 'сб', 'Sun': 'вс'}
     for s in schedules:
         s.days = ", ".join([day_map.get(day.strip(), day) for day in s.days.split(",")])
 
-    return await render_template("dashboard.html", schedules=schedules)
+    return await render_template("dashboard.html", schedules=schedules, relay_names=relay_names)
 
 @dashboard_bp.route("/add", methods=["GET", "POST"])
 async def add_schedule():
@@ -51,7 +55,8 @@ async def add_schedule():
                 session.add(new_task)
                 await session.commit()
 
-            await log_event("INFO", f"Добавлено расписание: {target} {days} {time_on}", target=target, action="ADD_TASK")
+                await log_event("INFO", f"Добавлено расписание: {target} {days} {time_on}", target=target, action="ADD_TASK")
+
             load_schedules_from_db()
             await flash("Задача успешно добавлена", "success")
             return redirect(url_for("dashboard.dashboard"))
@@ -60,7 +65,13 @@ async def add_schedule():
             await flash("Ошибка при добавлении задачи", "danger")
             await log_event("ERROR", f"Ошибка при сохранении задачи: {e}", action="ADD_FAIL")
 
-    return await render_template("schedule_form.html", targets=RelayTarget)
+    # GET-запрос — загружаем имена реле
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(select(RelayName))
+        relay_names = {r.relay_key: r.name for r in result.scalars()}
+
+    return await render_template("schedule_form.html", targets=RelayTarget, relay_names=relay_names)
+
 
 @dashboard_bp.route("/edit/<int:schedule_id>", methods=["GET", "POST"])
 async def edit_schedule(schedule_id):
@@ -99,24 +110,28 @@ async def edit_schedule(schedule_id):
                 await flash("Ошибка при обновлении задачи", "danger")
                 await log_event("ERROR", f"Ошибка при обновлении задачи {schedule_id}: {e}", action="EDIT_FAIL")
 
-    # Для GET-запроса — подготовка формы
-    days_selected = schedule.days.split(",") if schedule.days else []
-    hour_on = schedule.time_on.hour
-    minute_on = schedule.time_on.minute
-    duration_hour = schedule.duration_min // 60
-    duration_minute = schedule.duration_min % 60
+        # 🧠 Для GET-запроса — подготовка формы
+        days_selected = schedule.days.split(",") if schedule.days else []
+        hour_on = schedule.time_on.hour
+        minute_on = schedule.time_on.minute
+        duration_hour = schedule.duration_min // 60
+        duration_minute = schedule.duration_min % 60
 
-    return await render_template(
-        "schedule_form.html",
-        schedule=schedule,
-        targets=RelayTarget,
-        days_selected=days_selected,
-        hour_on=hour_on,
-        minute_on=minute_on,
-        duration_hour=duration_hour,
-        duration_minute=duration_minute
-    )
+        # ✅ Получаем пользовательские названия реле
+        result = await session.execute(select(RelayName))
+        relay_names = {r.relay_key: r.name for r in result.scalars()}
 
+        return await render_template(
+            "schedule_form.html",
+            schedule=schedule,
+            targets=RelayTarget,
+            relay_names=relay_names,
+            days_selected=days_selected,
+            hour_on=hour_on,
+            minute_on=minute_on,
+            duration_hour=duration_hour,
+            duration_minute=duration_minute
+        )
 @dashboard_bp.route("/delete/<int:schedule_id>")
 async def delete_schedule(schedule_id):
     async with AsyncSessionLocal() as session:
@@ -147,3 +162,28 @@ async def toggle_schedule(schedule_id):
 
     await load_schedules_from_db()
     return redirect(url_for("dashboard.dashboard"))
+
+
+@dashboard_bp.route("/settings", methods=["GET", "POST"])
+async def settings():
+    async with AsyncSessionLocal() as session:
+        if request.method == "POST":
+            form = await request.form
+            for relay_key in RelayTarget.__members__:
+                new_name = form.get(relay_key)
+                result = await session.execute(
+                    select(RelayName).where(RelayName.relay_key == relay_key)
+                )
+                record = result.scalar()
+                if record:
+                    record.name = new_name
+                else:
+                    session.add(RelayName(relay_key=relay_key, name=new_name))
+            await session.commit()
+            await flash("Названия реле обновлены", "success")
+            return redirect(url_for("dashboard.settings"))
+
+        # Для GET-запроса
+        result = await session.execute(select(RelayName))
+        names = {r.relay_key: r.name for r in result.scalars()}
+        return await render_template("settings.html", names=names, targets=RelayTarget)

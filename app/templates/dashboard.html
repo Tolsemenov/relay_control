@@ -1,7 +1,21 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container mt-4">
-  <h3>📅 Расписание автополива</h3>
+
+  <!-- 🔌 Управление реле -->
+  <div class="d-flex flex-wrap gap-3 justify-content-center mb-4">
+    {% for relay in relays %}
+      <form method="post" action="{{ url_for('dashboard.toggle_relay', relay_key=relay.relay_key) }}">
+        <button type="submit"
+                class="btn btn-sm {% if relay.state %}btn-primary{% else %}btn-outline-secondary{% endif %}"
+                style="min-width: 120px;">
+          {{ relay.name }}
+        </button>
+      </form>
+    {% endfor %}
+  </div>
+
+  <h3>📅 Расписание автовключений</h3>
   <a href="{{ url_for('dashboard.add_schedule') }}" class="btn btn-success btn-sm mb-3">➕ Добавить задачу</a>
 
   {% if schedules %}
@@ -10,7 +24,7 @@
       {% for s in schedules %}
       <div class="card mb-3">
         <div class="card-body">
-          <h5 class="card-title">{{ s.target.value }}</h5>
+          <h5 class="card-title">{{ relay_names[s.target.name] if relay_names[s.target.name] else s.target.value }}</h5>
           <p class="card-text">
             <strong>Дни:</strong> {{ s.days }}<br>
             <strong>Время:</strong> {{ s.time_on.strftime('%H:%M') }}<br>
@@ -48,7 +62,7 @@
           {% for s in schedules %}
           <tr>
             <td>{{ s.id }}</td>
-            <td>{{ s.target.value }}</td>
+            <td>{{ relay_names[s.target.name] if relay_names[s.target.name] else s.target.value }}</td>
             <td>{{ s.days }}</td>
             <td>{{ s.time_on.strftime('%H:%M') }}</td>
             <td>{{ s.duration_min }}</td>

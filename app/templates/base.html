@@ -9,18 +9,37 @@
 </head>
 <body>
   <nav class="navbar navbar-expand-lg navbar-dark bg-success px-3">
-  <a class="navbar-brand" href="{{ url_for('dashboard.dashboard') }}">Автополив</a>
+    <a class="navbar-brand" href="{{ url_for('dashboard.dashboard') }}">Умная Дача</a>
 
-  {% if session.logged_in %}
-  <div class="ms-auto d-flex gap-2">
-    <a href="{{ url_for('dashboard.add_schedule') }}" class="btn btn-outline-light btn-sm">➕ Добавить</a>
-    <a href="{{ url_for('logs.logs') }}" class="btn btn-outline-light btn-sm">📜 Логи</a>
-    <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light btn-sm">🚪 Выйти</a>
-  </div>
-  {% endif %}
-</nav>
-
+    {% if session.logged_in %}
+    <div class="ms-auto d-flex gap-2 align-items-center">
+      <a href="{{ url_for('dashboard.add_schedule') }}" class="btn btn-outline-light btn-sm">➕ Добавить</a>
+      <a href="{{ url_for('dashboard.settings') }}" class="btn btn-outline-light btn-sm">⚙️ Настройки</a>
+      <a href="{{ url_for('logs.logs') }}" class="btn btn-outline-light btn-sm">📜 Логи</a>
+      <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light btn-sm">🚪 Выйти</a>
+      <span class="navbar-text text-white" id="clock"></span>
+    </div>
+    {% endif %}
+  </nav>
 
   {% block content %}{% endblock %}
+
+  <!-- JS: обновление времени -->
+  <script>
+    function updateClock() {
+      const now = new Date();
+      const timeString = now.toLocaleTimeString("ru-RU", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+      });
+      const clock = document.getElementById("clock");
+      if (clock) {
+        clock.textContent = timeString;
+      }
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+  </script>
 </body>
 </html>

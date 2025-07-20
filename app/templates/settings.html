@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h3>⚙️ Настройки реле</h3>
+  <form method="post">
+    {% for target in targets %}
+  <div class="mb-3">
+    <label class="form-label">Название для {{ target.value }}</label>
+    <input type="text" class="form-control" name="{{ target.name }}" value="{{ names.get(target.name, '') }}">
+  </div>
+{% endfor %}
+    <button type="submit" class="btn btn-primary">💾 Сохранить</button>
+  </form>
+</div>
+{% endblock %}
