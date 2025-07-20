@@ -1,8 +1,8 @@
 # app/gpio/relay_controller.py
 
 try:
-    import orangepi.pi_pc as OPi
     import OPi.GPIO as GPIO
+    GPIO.setmode(GPIO.BOARD)
     GPIO_AVAILABLE = True
 except ImportError:
     print("[DEBUG] GPIO не поддерживается в этой системе (Windows?)")
@@ -22,7 +22,6 @@ class RelayController:
 
     def __init__(self):
         if GPIO_AVAILABLE:
-            GPIO.setboard(OPi.PC)
             GPIO.setmode(GPIO.BOARD)
             for pin in self.relay_pins.values():
                 GPIO.setup(pin, GPIO.OUT)
