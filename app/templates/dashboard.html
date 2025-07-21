@@ -1,21 +1,34 @@
 {% extends "base.html" %}
-{% block content %}
-<div class="container mt-4">
 
-  <!-- 🔌 Управление реле -->
-  <div class="d-flex flex-wrap gap-3 justify-content-center mb-4">
-    {% for relay in relays %}
-      <form method="post" action="{{ url_for('dashboard.toggle_relay', relay_key=relay.relay_key) }}">
-        <button type="submit"
-                class="btn btn-sm {% if relay.state %}btn-primary{% else %}btn-outline-secondary{% endif %}"
-                style="min-width: 120px;">
-          {{ relay.name }}
-        </button>
+{% block relay_buttons %}
+  <<!-- 🔌 Управление реле -->
+<div class="container text-center mt-4">
+  <div class="row justify-content-center">
+    {% for relay in relays.values() %}
+    <div class="col-6 col-sm-3 mb-4">
+      <form method="get" action="{{ url_for('dashboard.toggle_relay', relay_key=relay.relay_key) }}">
+        <div class="d-flex flex-column align-items-center">
+          <strong class="mb-2">{{ relay.name }}</strong>
+          <button type="submit"
+                  class="btn rounded-circle p-3"
+                  style="
+                    width: 70px;
+                    height: 70px;
+                    background-color: {% if relay.status %}#dc3545{% else %}#ffffff{% endif %};
+                    border: 2px solid #dc3545;">
+            <img src="{{ url_for('static', filename='power_icon_white.png') }}"
+                 style="width: 30px; height: 30px;" alt="Power">
+          </button>
+        </div>
       </form>
+    </div>
     {% endfor %}
   </div>
+</div>
+{% endblock %}
 
-  <h3>📅 Расписание автовключений</h3>
+{% block content %}
+  <h3 class="mt-4">📅 Расписание автовключений</h3>
   <a href="{{ url_for('dashboard.add_schedule') }}" class="btn btn-success btn-sm mb-3">➕ Добавить задачу</a>
 
   {% if schedules %}
@@ -24,7 +37,7 @@
       {% for s in schedules %}
       <div class="card mb-3">
         <div class="card-body">
-          <h5 class="card-title">{{ relay_names[s.target.name] if relay_names[s.target.name] else s.target.value }}</h5>
+          <h5 class="card-title">{{ relay_names.get(s.target.name, s.target.value) }}</h5>
           <p class="card-text">
             <strong>Дни:</strong> {{ s.days }}<br>
             <strong>Время:</strong> {{ s.time_on.strftime('%H:%M') }}<br>
@@ -47,7 +60,7 @@
     <!-- Десктопная таблица -->
     <div class="table-responsive d-none d-md-block">
       <table class="table table-bordered table-hover">
-         <thead class="table-light">
+        <thead class="table-light">
           <tr>
             <th>ID</th>
             <th>Реле</th>
@@ -62,7 +75,7 @@
           {% for s in schedules %}
           <tr>
             <td>{{ s.id }}</td>
-            <td>{{ relay_names[s.target.name] if relay_names[s.target.name] else s.target.value }}</td>
+            <td>{{ relay_names.get(s.target.name, s.target.value) }}</td>
             <td>{{ s.days }}</td>
             <td>{{ s.time_on.strftime('%H:%M') }}</td>
             <td>{{ s.duration_min }}</td>
@@ -85,5 +98,4 @@
   {% else %}
     <p class="text-muted">Пока нет заданий в расписании.</p>
   {% endif %}
-</div>
 {% endblock %}

@@ -17,15 +17,16 @@ async def dashboard():
         result = await session.execute(select(Schedule))
         schedules = result.scalars().all()
 
-        # Получить имена реле из базы
         relay_result = await session.execute(select(RelayName))
-        relay_names = {r.relay_key: r.name for r in relay_result.scalars()}
+        relay_records = relay_result.scalars().all()
+        relay_names = {r.relay_key: r.name for r in relay_records}
+        relays = {r.relay_key: r for r in relay_records}
 
     day_map = {'Mon': 'пн', 'Tue': 'Вт', 'Wed': 'ср', 'Thu': 'чт', 'Fri': 'пт', 'Sat': 'сб', 'Sun': 'вс'}
     for s in schedules:
         s.days = ", ".join([day_map.get(day.strip(), day) for day in s.days.split(",")])
 
-    return await render_template("dashboard.html", schedules=schedules, relay_names=relay_names)
+    return await render_template("dashboard.html", schedules=schedules, relay_names=relay_names, relays=relays)
 
 @dashboard_bp.route("/add", methods=["GET", "POST"])
 async def add_schedule():
@@ -57,7 +58,7 @@ async def add_schedule():
 
                 await log_event("INFO", f"Добавлено расписание: {target} {days} {time_on}", target=target, action="ADD_TASK")
 
-            load_schedules_from_db()
+            await load_schedules_from_db()
             await flash("Задача успешно добавлена", "success")
             return redirect(url_for("dashboard.dashboard"))
 
@@ -102,7 +103,7 @@ async def edit_schedule(schedule_id):
 
                 await session.commit()
                 await log_event("INFO", f"Расписание {schedule_id} обновлено", target=schedule.target.value, action="EDIT_TASK")
-                load_schedules_from_db()
+                await load_schedules_from_db()
                 await flash("Задача обновлена", "success")
                 return redirect(url_for("dashboard.dashboard"))
 
@@ -142,25 +143,30 @@ async def delete_schedule(schedule_id):
             await session.delete(schedule)
             await session.commit()
 
-    load_schedules_from_db()
+    await load_schedules_from_db()
     await flash("Задача удалена", "info")
     return redirect(url_for("dashboard.dashboard"))
 
-@dashboard_bp.route("/toggle_schedule/<int:schedule_id>")
-async def toggle_schedule(schedule_id):
+@dashboard_bp.route("/toggle_relay/<string:relay_key>")
+async def toggle_relay(relay_key):
+    if relay_key not in [r.value for r in RelayTarget]:
+        await flash(f"Недопустимый ключ реле: {relay_key}", "danger")
+        return redirect(url_for("dashboard.dashboard"))
     async with AsyncSessionLocal() as session:
-        result = await session.execute(select(Schedule).where(Schedule.id == schedule_id))
-        schedule = result.scalar()
+        result = await session.execute(select(RelayName).where(RelayName.relay_key == relay_key))
+        relay = result.scalar()
 
-        if schedule:
-            schedule.enabled = not schedule.enabled
-            await session.commit()
+        if not relay:
+            await flash(f"Реле '{relay_key}' не найдено", "danger")
+            return redirect(url_for("dashboard.dashboard"))
 
-            action = "TASK_ENABLED" if schedule.enabled else "TASK_DISABLED"
-            status = "включено" if schedule.enabled else "отключено"
-            await log_event("INFO", f"Расписание ID={schedule.id} {status}", target=schedule.target.value, action=action)
+        # Переключаем статус
+        relay.status = not relay.status
+        await session.commit()
 
-    await load_schedules_from_db()
+        state = "включено" if relay.status else "выключено"
+        await log_event("INFO", f"Реле '{relay.name}' вручную {state}", target=relay_key, action="MANUAL_SWITCH")
+
     return redirect(url_for("dashboard.dashboard"))
 
 
@@ -187,3 +193,21 @@ async def settings():
         result = await session.execute(select(RelayName))
         names = {r.relay_key: r.name for r in result.scalars()}
         return await render_template("settings.html", names=names, targets=RelayTarget)
+
+
+@dashboard_bp.route("/toggle_schedule/<int:schedule_id>")
+async def toggle_schedule(schedule_id):
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(select(Schedule).where(Schedule.id == schedule_id))
+        schedule = result.scalar()
+
+        if schedule:
+            schedule.enabled = not schedule.enabled
+            await session.commit()
+
+            action = "TASK_ENABLED" if schedule.enabled else "TASK_DISABLED"
+            status = "включено" if schedule.enabled else "отключено"
+            await log_event("INFO", f"Расписание ID={schedule.id} {status}", target=schedule.target.value, action=action)
+
+    await load_schedules_from_db()
+    return redirect(url_for("dashboard.dashboard"))
