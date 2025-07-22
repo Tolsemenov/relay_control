@@ -147,7 +147,7 @@ async def delete_schedule(schedule_id):
     await flash("Задача удалена", "info")
     return redirect(url_for("dashboard.dashboard"))
 
-@dashboard_bp.route("/toggle_relay/<string:relay_key>")
+@dashboard_bp.route("/toggle_relay/<string:relay_key>", methods=["POST"])
 async def toggle_relay(relay_key):
     if relay_key not in [r.value for r in RelayTarget]:
         await flash(f"Недопустимый ключ реле: {relay_key}", "danger")

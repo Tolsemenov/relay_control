@@ -1,25 +1,22 @@
 {% extends "base.html" %}
 
 {% block relay_buttons %}
-  <<!-- 🔌 Управление реле -->
-<div class="container text-center mt-4">
+<!-- 🔌 Красивая панель переключения реле -->
+<div class="container mt-4">
   <div class="row justify-content-center">
     {% for relay in relays.values() %}
-    <div class="col-6 col-sm-3 mb-4">
-      <form method="get" action="{{ url_for('dashboard.toggle_relay', relay_key=relay.relay_key) }}">
-        <div class="d-flex flex-column align-items-center">
-          <strong class="mb-2">{{ relay.name }}</strong>
-          <button type="submit"
-                  class="btn rounded-circle p-3"
-                  style="
-                    width: 70px;
-                    height: 70px;
-                    background-color: {% if relay.status %}#dc3545{% else %}#ffffff{% endif %};
-                    border: 2px solid #dc3545;">
-            <img src="{{ url_for('static', filename='power_icon_white.png') }}"
-                 style="width: 30px; height: 30px;" alt="Power">
-          </button>
-        </div>
+    <div class="col-6 col-sm-3 mb-4 text-center">
+      <form method="post" action="{{ url_for('dashboard.toggle_relay', relay_key=relay.relay_key) }}">
+        <label class="relay-switch">
+          <input type="submit" class="d-none">
+          <div class="switch-toggle {% if relay.status %}on{% else %}off{% endif %}">
+            <div class="circle"></div>
+            <span class="label-text">
+              {% if relay.status %}ON{% else %}OFF{% endif %}
+            </span>
+          </div>
+        </label>
+        <div class="mt-2 fw-bold">{{ relay.name or relay.relay_key }}</div>
       </form>
     </div>
     {% endfor %}
@@ -28,74 +25,74 @@
 {% endblock %}
 
 {% block content %}
-  <h3 class="mt-4">📅 Расписание автовключений</h3>
-  <a href="{{ url_for('dashboard.add_schedule') }}" class="btn btn-success btn-sm mb-3">➕ Добавить задачу</a>
+<h3 class="mt-4">📅 Расписание автовключений</h3>
+<a href="{{ url_for('dashboard.add_schedule') }}" class="btn btn-success btn-sm mb-3">➕ Добавить задачу</a>
 
-  {% if schedules %}
-    <!-- Мобильная версия -->
-    <div class="d-block d-md-none">
-      {% for s in schedules %}
-      <div class="card mb-3">
-        <div class="card-body">
-          <h5 class="card-title">{{ relay_names.get(s.target.name, s.target.value) }}</h5>
-          <p class="card-text">
-            <strong>Дни:</strong> {{ s.days }}<br>
-            <strong>Время:</strong> {{ s.time_on.strftime('%H:%M') }}<br>
-            <strong>Длительность:</strong> {{ s.duration_min }} мин<br>
-            <strong>Вкл:</strong> {% if s.enabled %}✅{% else %}❌{% endif %}
-          </p>
-          <div class="d-flex flex-wrap gap-2 justify-content-end">
-            <a href="{{ url_for('dashboard.edit_schedule', schedule_id=s.id) }}" class="btn btn-primary btn-sm">✏️</a>
-            <a href="{{ url_for('dashboard.delete_schedule', schedule_id=s.id) }}"
-               class="btn btn-danger btn-sm"
-               onclick="return confirm('Удалить задачу {{ s.id }}?');">🗑️</a>
-            <a href="{{ url_for('dashboard.toggle_schedule', schedule_id=s.id) }}"
-               class="btn btn-secondary btn-sm">🔁</a>
-          </div>
+{% if schedules %}
+  <!-- Мобильная версия -->
+  <div class="d-block d-md-none">
+    {% for s in schedules %}
+    <div class="card mb-3">
+      <div class="card-body">
+        <h5 class="card-title">{{ relay_names.get(s.target.name, s.target.value) }}</h5>
+        <p class="card-text">
+          <strong>Дни:</strong> {{ s.days }}<br>
+          <strong>Время:</strong> {{ s.time_on.strftime('%H:%M') }}<br>
+          <strong>Длительность:</strong> {{ s.duration_min }} мин<br>
+          <strong>Вкл:</strong> {% if s.enabled %}✅{% else %}❌{% endif %}
+        </p>
+        <div class="d-flex flex-wrap gap-2 justify-content-end">
+          <a href="{{ url_for('dashboard.edit_schedule', schedule_id=s.id) }}" class="btn btn-primary btn-sm">✏️</a>
+          <a href="{{ url_for('dashboard.delete_schedule', schedule_id=s.id) }}"
+             class="btn btn-danger btn-sm"
+             onclick="return confirm('Удалить задачу {{ s.id }}?');">🗑️</a>
+          <a href="{{ url_for('dashboard.toggle_schedule', schedule_id=s.id) }}"
+             class="btn btn-secondary btn-sm">🔁</a>
         </div>
       </div>
-      {% endfor %}
     </div>
+    {% endfor %}
+  </div>
 
-    <!-- Десктопная таблица -->
-    <div class="table-responsive d-none d-md-block">
-      <table class="table table-bordered table-hover">
-        <thead class="table-light">
-          <tr>
-            <th>ID</th>
-            <th>Реле</th>
-            <th>Дни</th>
-            <th>Время</th>
-            <th>Длительность (мин)</th>
-            <th>Вкл.</th>
-            <th>Действия</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for s in schedules %}
-          <tr>
-            <td>{{ s.id }}</td>
-            <td>{{ relay_names.get(s.target.name, s.target.value) }}</td>
-            <td>{{ s.days }}</td>
-            <td>{{ s.time_on.strftime('%H:%M') }}</td>
-            <td>{{ s.duration_min }}</td>
-            <td>{% if s.enabled %}✅{% else %}❌{% endif %}</td>
-            <td>
-              <div class="d-flex flex-wrap gap-2">
-                <a href="{{ url_for('dashboard.edit_schedule', schedule_id=s.id) }}" class="btn btn-sm btn-primary">✏️</a>
-                <a href="{{ url_for('dashboard.delete_schedule', schedule_id=s.id) }}"
-                   class="btn btn-sm btn-danger"
-                   onclick="return confirm('Удалить задачу {{ s.id }}?');">🗑️</a>
-                <a href="{{ url_for('dashboard.toggle_schedule', schedule_id=s.id) }}"
-                   class="btn btn-sm btn-secondary">🔁</a>
-              </div>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  {% else %}
-    <p class="text-muted">Пока нет заданий в расписании.</p>
-  {% endif %}
+  <!-- Десктопная таблица -->
+  <div class="table-responsive d-none d-md-block">
+    <table class="table table-bordered table-hover">
+      <thead class="table-light">
+        <tr>
+          <th>ID</th>
+          <th>Реле</th>
+          <th>Дни</th>
+          <th>Время</th>
+          <th>Длительность (мин)</th>
+          <th>Вкл.</th>
+          <th>Действия</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in schedules %}
+        <tr>
+          <td>{{ s.id }}</td>
+          <td>{{ relay_names.get(s.target.name, s.target.value) }}</td>
+          <td>{{ s.days }}</td>
+          <td>{{ s.time_on.strftime('%H:%M') }}</td>
+          <td>{{ s.duration_min }}</td>
+          <td>{% if s.enabled %}✅{% else %}❌{% endif %}</td>
+          <td>
+            <div class="d-flex flex-wrap gap-2">
+              <a href="{{ url_for('dashboard.edit_schedule', schedule_id=s.id) }}" class="btn btn-sm btn-primary">✏️</a>
+              <a href="{{ url_for('dashboard.delete_schedule', schedule_id=s.id) }}"
+                 class="btn btn-sm btn-danger"
+                 onclick="return confirm('Удалить задачу {{ s.id }}?');">🗑️</a>
+              <a href="{{ url_for('dashboard.toggle_schedule', schedule_id=s.id) }}"
+                 class="btn btn-sm btn-secondary">🔁</a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <p class="text-muted">Пока нет заданий в расписании.</p>
+{% endif %}
 {% endblock %}
