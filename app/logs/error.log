@@ -30,3 +30,13 @@
 [SQL: INSERT INTO logs (target, level, action, message, timestamp) VALUES (?, ?, ?, ?, ?)]
 [parameters: (None, 'INFO', 'APP_START', 'Сервер стартует', '2025-07-19 19:51:26.604662')]
 (Background on this error at: https://sqlalche.me/e/20/e3q8)
+[2025-07-25 01:21:14] [ERROR] autowater: Ошибка при регистрации задачи 3: Unrecognized expression "" for field "day_of_week"
+[2025-07-25 01:22:50] [ERROR] autowater: Ошибка при регистрации задачи 3: Unrecognized expression "" for field "day_of_week"
+[2025-07-25 01:23:12] [ERROR] autowater: Ошибка при регистрации задачи 3: Unrecognized expression "" for field "day_of_week"
+[2025-07-25 01:26:56] [ERROR] autowater: Ошибка при регистрации задачи 3: Unrecognized expression "" for field "day_of_week"
+[2025-07-25 01:28:16] [ERROR] autowater: Ошибка при регистрации задачи 3: Unrecognized expression "" for field "day_of_week"
+[2025-07-25 01:48:39] [ERROR] autowater: Ошибка при регистрации задачи 3: Unrecognized expression "" for field "day_of_week"
+[2025-07-25 01:49:15] [ERROR] autowater: Ошибка при регистрации задачи 3: Unrecognized expression "" for field "day_of_week"
+[2025-07-25 01:50:37] [ERROR] autowater: Ошибка при регистрации задачи 3: Unrecognized expression "" for field "day_of_week"
+[2025-07-25 01:50:52] [ERROR] autowater: Ошибка при регистрации задачи 3: Unrecognized expression "" for field "day_of_week"
+[2025-07-25 01:51:36] [ERROR] autowater: Ошибка при регистрации задачи 3: Unrecognized expression "" for field "day_of_week"

@@ -12,10 +12,10 @@ from app.logs.logger_helper import log_event
 
 class RelayController:
     relay_pins = {
-        RelayTarget.VALVE1: 11,
-        RelayTarget.VALVE2: 13,
-        RelayTarget.VALVE3: 15,
-        RelayTarget.VALVE4: 16,
+        RelayTarget.valve1: 11,
+        RelayTarget.valve2: 13,
+        RelayTarget.valve3: 15,
+        RelayTarget.valve4: 16,
     }
 
     def __init__(self):

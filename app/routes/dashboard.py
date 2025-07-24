@@ -19,7 +19,15 @@ async def dashboard():
 
         relay_result = await session.execute(select(RelayName))
         relay_records = relay_result.scalars().all()
-        relay_names = {r.relay_key: r.name for r in relay_records}
+        # Если имя не задано, используем ключ как дефолт
+        relay_names = {r.relay_key: r.name or r.relay_key for r in relay_records}
+
+        # Также добавим дефолтные названия, если нет записи в БД (на случай valve3/valve4)
+        from app.db.models import RelayTarget
+        for target in RelayTarget:
+            if target.value not in relay_names:
+                relay_names[target.value] = target.value
+
         relays = {r.relay_key: r for r in relay_records}
 
     day_map = {'Mon': 'пн', 'Tue': 'Вт', 'Wed': 'ср', 'Thu': 'чт', 'Fri': 'пт', 'Sat': 'сб', 'Sun': 'вс'}
@@ -149,13 +157,14 @@ async def delete_schedule(schedule_id):
 
 @dashboard_bp.route("/toggle_relay/<string:relay_key>", methods=["POST"])
 async def toggle_relay(relay_key):
+
     if relay_key not in [r.value for r in RelayTarget]:
         await flash(f"Недопустимый ключ реле: {relay_key}", "danger")
         return redirect(url_for("dashboard.dashboard"))
+
     async with AsyncSessionLocal() as session:
         result = await session.execute(select(RelayName).where(RelayName.relay_key == relay_key))
         relay = result.scalar()
-
         if not relay:
             await flash(f"Реле '{relay_key}' не найдено", "danger")
             return redirect(url_for("dashboard.dashboard"))

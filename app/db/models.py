@@ -8,11 +8,11 @@ import enum
 Base = declarative_base()
 
 class RelayTarget(str, enum.Enum):
-    """Назначение каждого реле (реле1 = насос, реле2 = кран и т.д.)"""
-    VALVE1 = "valve1"
-    VALVE2 = "valve2"
-    VALVE3 = "valve3"
-    VALVE4 = "valve4"
+    """Назначение каждого реле (реле1 = насос, реле2 = кран и т.д.)target """
+    valve1 = "valve1"
+    valve2 = "valve2"
+    valve3 = "valve3"
+    valve4 = "valve4"
 
 class Schedule(Base):
     """Расписание для включения реле"""
