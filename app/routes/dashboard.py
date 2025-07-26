@@ -4,6 +4,7 @@ from quart import request, redirect, url_for, flash, render_template, Blueprint
 from datetime import datetime
 
 from app.db.database import AsyncSessionLocal
+from app.gpio.relay_state_manager import RelayStateManager
 from app.logs.logger_helper import log_event
 from app.scheduler import load_schedules_from_db
 from app.db.models import Schedule, RelayName, RelayTarget
@@ -170,8 +171,7 @@ async def toggle_relay(relay_key):
             return redirect(url_for("dashboard.dashboard"))
 
         # Переключаем статус
-        relay.status = not relay.status
-        await session.commit()
+        await RelayStateManager.set_status(relay_key, not relay.status, source="WEB")
 
         state = "включено" if relay.status else "выключено"
         await log_event("INFO", f"Реле '{relay.name}' вручную {state}", target=relay_key, action="MANUAL_SWITCH")

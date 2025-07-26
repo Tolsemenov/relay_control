@@ -6,6 +6,7 @@ import asyncio
 from app.db.database import AsyncSessionLocal
 from app.db.models import Schedule, RelayTarget
 from app.gpio.relay_controller import RelayController
+from app.gpio.relay_state_manager import RelayStateManager
 from app.logs.logger_helper import log_event
 
 controller = RelayController()
@@ -18,7 +19,7 @@ def schedule_task(schedule: Schedule):
         print(f"[SCHEDULER] ⏰ Включение реле по задаче ID={schedule.id}")
         await log_event("DEBUG", f"Запуск включения реле {schedule.target.value}", target=schedule.target, action="SCHEDULE_DEBUG_ON")
 
-        await controller.turn_on(schedule.target)
+        await RelayStateManager.set_status(schedule.target.value, True, source="SCHEDULE")
         await log_event("INFO", f"Реле {schedule.target.value} включено (ID={schedule.id})", target=schedule.target, action="SCHEDULE_ON")
 
         # Планируем выключение через N минут

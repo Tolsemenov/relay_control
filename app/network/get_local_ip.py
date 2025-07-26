@@ -3,12 +3,12 @@
 import socket
 
 def get_local_ip():
-    """Возвращает локальный IP-адрес устройства"""
     try:
+        # подключаемся к внешнему адресу, чтобы получить IP интерфейса
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))  # внешний адрес, чтобы определить интерфейс
+        s.connect(("8.8.8.8", 80))  # любой внешний адрес
         ip = s.getsockname()[0]
         s.close()
         return ip
     except Exception:
-        return "Не удалось определить IP"
+        return "127.0.0.1"

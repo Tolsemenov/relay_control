@@ -15,6 +15,7 @@ from app.app_factory import create_main_app
 from app.wifi_setup.button_listener import start_button_listener
 from app.wifi_setup.wifi_manager import is_wifi_connected, start_access_point, run_flask_web
 
+
 IS_WINDOWS = platform.system() == "Windows"
 
 async def start_main_web_server():

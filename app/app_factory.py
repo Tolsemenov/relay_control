@@ -11,7 +11,7 @@ from app.routes.auth import auth_bp
 from app.routes.dashboard import dashboard_bp
 from app.routes.logs import logs_bp
 from app.routes.settings import settings_bp
-
+from app.websockets.routes import ws_bp
 load_dotenv()
 
 def create_main_app():
@@ -29,6 +29,7 @@ def create_main_app():
 
     #Session(app)
 
+    app.register_blueprint(ws_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(logs_bp)

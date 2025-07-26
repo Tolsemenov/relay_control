@@ -1,3 +1,5 @@
+# app/gpio/relay_controller.py
+
 try:
     import RPi.GPIO as GPIO
     GPIO.setmode(GPIO.BOARD)
@@ -9,6 +11,8 @@ except ImportError:
 from app.db.models import RelayTarget
 from app.logs.logger_helper import log_event
 
+
+from typing import Union
 
 class RelayController:
     relay_pins = {
@@ -33,25 +37,35 @@ class RelayController:
         else:
             await log_event("WARNING", "GPIO недоступен — реле не будут управляться", action="INIT")
 
-    async def turn_on(self, target: RelayTarget):
-        pin = self.relay_pins.get(target)
-        if pin is None:
-            await log_event("ERROR", f"Неизвестная цель: {target}", target=target, action="ON")
+    def _get_target_enum(self, target: Union[str, RelayTarget]) -> Union[RelayTarget, None]:
+        if isinstance(target, RelayTarget):
+            return target
+        try:
+            return RelayTarget[target]  # Преобразует строку 'valve1' → RelayTarget.valve1
+        except KeyError:
+            return None
+
+    async def turn_on(self, target: Union[str, RelayTarget]):
+        target_enum = self._get_target_enum(target)
+        if target_enum is None:
+            await log_event("ERROR", f"Неизвестная цель: {target}", target=str(target), action="ON")
             return
 
-        if GPIO_AVAILABLE:
+        pin = self.relay_pins.get(target_enum)
+        if GPIO_AVAILABLE and pin:
             GPIO.output(pin, GPIO.LOW)
-        await log_event("INFO", f"{target.value.upper()} включен", target=target, action="ON")
+        await log_event("INFO", f"{target_enum.value.upper()} включен", target=target_enum.value, action="ON")
 
-    async def turn_off(self, target: RelayTarget):
-        pin = self.relay_pins.get(target)
-        if pin is None:
-            await log_event("ERROR", f"Неизвестная цель: {target}", target=target, action="OFF")
+    async def turn_off(self, target: Union[str, RelayTarget]):
+        target_enum = self._get_target_enum(target)
+        if target_enum is None:
+            await log_event("ERROR", f"Неизвестная цель: {target}", target=str(target), action="OFF")
             return
 
-        if GPIO_AVAILABLE:
+        pin = self.relay_pins.get(target_enum)
+        if GPIO_AVAILABLE and pin:
             GPIO.output(pin, GPIO.HIGH)
-        await log_event("INFO", f"{target.value.upper()} выключен", target=target, action="OFF")
+        await log_event("INFO", f"{target_enum.value.upper()} выключен", target=target_enum.value, action="OFF")
 
     async def cleanup(self):
         if GPIO_AVAILABLE:

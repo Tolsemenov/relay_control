@@ -1,31 +1,27 @@
-document.addEventListener("DOMContentLoaded", function () {
-  document.querySelectorAll(".relay-toggle").forEach(button => {
-    button.addEventListener("click", async () => {
-      const relayKey = button.dataset.relayKey;
+<script>
+  const ws = new WebSocket(`ws://${location.host}/ws`);
 
-      try {
-        const response = await fetch(`/toggle_relay/${relayKey}`, {
-          method: "POST"
-        });
+  ws.onmessage = function (event) {
+    const data = JSON.parse(event.data);
 
-        if (!response.ok) throw new Error("Ошибка переключения");
+    if (data.type === "status_update") {
+      const relayKey = data.relay_key;
+      const status = data.status;
 
-        const data = await response.json();
+      const toggleDiv = document.querySelector(`.switch-toggle[data-relay-key="${relayKey}"]`);
+      if (toggleDiv) {
+        toggleDiv.classList.toggle("on", status);
+        toggleDiv.classList.toggle("off", !status);
 
-        const isOn = data.status === true;
-
-        // Обновим классы
-        button.classList.toggle("on", isOn);
-        button.classList.toggle("off", !isOn);
-
-        // Обновим текст
-        const label = button.querySelector(".label-text");
-        if (label) label.textContent = isOn ? "ON" : "OFF";
-
-      } catch (err) {
-        console.error("Ошибка:", err);
-        alert("Ошибка переключения реле");
+        const labelText = toggleDiv.querySelector(".label-text");
+        if (labelText) {
+          labelText.textContent = status ? "ON" : "OFF";
+        }
       }
-    });
-  });
-});
+    }
+  };
+
+  ws.onopen = () => console.log("✅ WebSocket соединение установлено");
+  ws.onerror = () => console.error("❌ WebSocket ошибка");
+  ws.onclose = () => console.warn("🔌 WebSocket соединение закрыто");
+</script>

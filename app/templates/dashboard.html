@@ -9,15 +9,14 @@
       <form method="post" action="{{ url_for('dashboard.toggle_relay', relay_key=relay.relay_key) }}">
         <label class="relay-switch">
           <input type="submit" class="d-none">
-          <div class="switch-toggle {% if relay.status %}on{% else %}off{% endif %}">
+          <div class="switch-toggle {% if relay.status %}on{% else %}off{% endif %}" data-relay-key="{{ relay.relay_key }}">
             <div class="circle"></div>
-            <span class="label-text">
-              {% if relay.status %}ON{% else %}OFF{% endif %}
-            </span>
+            <span class="label-text">{{ 'ON' if relay.status else 'OFF' }}</span>
           </div>
         </label>
         <div class="mt-2 fw-bold">{{ relay.name or relay.relay_key }}</div>
       </form>
+    <div class="mt-2 fw-bold">{{ relay.name or relay.relay_key }}</div>
     </div>
     {% endfor %}
   </div>
