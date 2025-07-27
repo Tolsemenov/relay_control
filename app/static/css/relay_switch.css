@@ -1,41 +1,24 @@
-.relay-switch .switch-toggle {
-  width: 70px;
-  height: 36px;
-  border-radius: 20px;
+.switch-toggle {
   position: relative;
-  cursor: pointer;
-  transition: background 0.3s ease;
+  width: 60px;
+  height: 32px;
+  border-radius: 16px;
+  background-color: #dc3545; /* OFF */
+  transition: background-color 0.3s;
   display: flex;
   align-items: center;
-  padding: 0 5px;
-}
-
-.relay-switch .switch-toggle.on {
-  background: #28a745;
   justify-content: flex-start;
-  color: white;
+  padding: 0 4px;
 }
 
-.relay-switch .switch-toggle.off {
-  background: #6c757d;
+.switch-toggle.on {
+  background-color: #28a745; /* ON */
   justify-content: flex-end;
-  color: white;
 }
 
-.relay-switch .circle {
-  width: 26px;
-  height: 26px;
-  background: white;
+.circle {
+  width: 24px;
+  height: 24px;
+  background-color: white;
   border-radius: 50%;
-  box-shadow: 0 0 3px rgba(0, 0, 0, 0.4);
-  transition: all 0.3s ease;
-}
-
-.relay-switch .label-text {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 12px;
-  font-weight: bold;
-  pointer-events: none;
 }

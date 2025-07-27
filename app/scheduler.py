@@ -37,7 +37,8 @@ def schedule_task(schedule: Schedule):
         print(f"[SCHEDULER] ⏰ Выключение реле по задаче ID={schedule.id}")
         await log_event("DEBUG", f"Запуск выключения реле {schedule.target.value}", target=schedule.target, action="SCHEDULE_DEBUG_OFF")
 
-        await controller.turn_off(schedule.target)
+        # 💡 Правильно: централизованное отключение с обновлением базы и WebSocket
+        await RelayStateManager.set_status(schedule.target.value, False, source="SCHEDULE")
         await log_event("INFO", f"Реле {schedule.target.value} выключено (ID={schedule.id})", target=schedule.target, action="SCHEDULE_OFF")
 
     # Преобразуем дни недели
