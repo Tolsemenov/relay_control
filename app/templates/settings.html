@@ -8,8 +8,36 @@
     <label class="form-label">Название для {{ target.value }}</label>
     <input type="text" class="form-control" name="{{ target.name }}" value="{{ names.get(target.name, '') }}">
   </div>
+
 {% endfor %}
+<hr class="my-4">
+<h3>🕒 Настройка времени системы</h3>
+<form method="post" action="{{ url_for('dashboard.set_time') }}">
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <label for="datetime" class="form-label">Ручная установка времени:</label>
+      <input type="datetime-local" class="form-control" id="datetime" name="datetime">
+    </div>
+    <div class="col-md-6">
+      <label for="timezone" class="form-label">Часовой пояс:</label>
+      <select class="form-select" id="timezone" name="timezone">
+        {% for tz in timezones %}
+        <option value="{{ tz }}" {% if tz == current_timezone %}selected{% endif %}>{{ tz }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <div class="form-check mb-3">
+    <input class="form-check-input" type="checkbox" name="ntp_enabled" id="ntp_enabled" {% if ntp_enabled %}checked{% endif %}>
+    <label class="form-check-label" for="ntp_enabled">Включить синхронизацию через NTP</label>
+  </div>
+
+
     <button type="submit" class="btn btn-primary">💾 Сохранить</button>
   </form>
+  <div class="container mt-2">
+      <a href="{{ url_for('logs.logs') }}" class="btn btn-outline-secondary btn-sm">📜 Посмотреть логи</a>
+  </div>
 </div>
 {% endblock %}

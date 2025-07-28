@@ -54,7 +54,6 @@ def schedule_task(schedule: Schedule):
         minute=schedule.time_on.minute
     )
 
-    print(f"[SCHEDULER] ✅ Регистрируем задачу ID={schedule.id} для реле={schedule.target.value}, время={schedule.time_on}, дни={days}")
 
     scheduler.add_job(
         func=task_on,

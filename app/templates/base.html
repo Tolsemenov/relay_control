@@ -42,9 +42,8 @@
 
     {% if session.logged_in %}
     <div class="ms-auto d-flex gap-2 align-items-center">
-      <a href="{{ url_for('dashboard.add_schedule') }}" class="btn btn-outline-light btn-sm">➕ Добавить</a>
       <a href="{{ url_for('dashboard.settings') }}" class="btn btn-outline-light btn-sm">⚙️ Настройки</a>
-      <a href="{{ url_for('logs.logs') }}" class="btn btn-outline-light btn-sm">📜 Логи</a>
+      <a href="{{ url_for('journal.journal') }}" class="btn btn-outline-light btn-sm">📘 Журнал</a>
       <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light btn-sm">🚪 Выйти</a>
       <span class="navbar-text text-white" id="clock"></span>
     </div>

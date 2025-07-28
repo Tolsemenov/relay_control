@@ -1,51 +1,32 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>🌱 Умная Дача</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-success px-3">
-    <a class="navbar-brand" href="{{ url_for('dashboard.dashboard') }}">Умная Дача</a>
+{% extends "base.html" %}
 
-    {% if session.logged_in %}
-    <div class="ms-auto d-flex gap-2 align-items-center">
-      <a href="{{ url_for('dashboard.add_schedule') }}" class="btn btn-outline-light btn-sm">➕ Добавить</a>
-      <a href="{{ url_for('dashboard.settings') }}" class="btn btn-outline-light btn-sm">⚙️ Настройки</a>
-      <a href="{{ url_for('logs.logs') }}" class="btn btn-outline-light btn-sm">📜 Логи</a>
-      <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light btn-sm">🚪 Выйти</a>
-      <span class="navbar-text text-white" id="clock"></span>
-    </div>
-    {% endif %}
-  </nav>
+{% block content %}
+<h3 class="mt-4">📜 Логи системы</h3>
 
-  <!-- 🔌 Кнопки управления реле -->
-  <div class="container mt-3">
-    {% block relay_buttons %}{% endblock %}
-  </div>
+<table class="table table-bordered table-hover table-sm">
+  <thead class="table-light">
+    <tr>
+      <th>Время</th>
+      <th>Уровень</th>
+      <th>Действие</th>
+      <th>Цель</th>
+      <th>Сообщение</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for log in logs %}
+    <tr>
+      <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+      <td>{{ log.level }}</td>
+      <td>{{ log.action }}</td>
+      <td>{{ log.target or '—' }}</td>
+      <td>{{ log.message }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 
-  <div class="container mt-4">
-    {% block content %}{% endblock %}
-  </div>
-
-  <!-- JS: обновление времени -->
-  <script>
-    function updateClock() {
-      const now = new Date();
-      const timeString = now.toLocaleTimeString("ru-RU", {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit"
-      });
-      const clock = document.getElementById("clock");
-      if (clock) {
-        clock.textContent = timeString;
-      }
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
-  </script>
-</body>
-</html>
+{% if not logs %}
+<p class="text-muted">Логов пока нет.</p>
+{% endif %}
+{% endblock %}

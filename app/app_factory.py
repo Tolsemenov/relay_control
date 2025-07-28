@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 
 from app.routes.auth import auth_bp
 from app.routes.dashboard import dashboard_bp
+from app.routes.journal import journal_bp
 from app.routes.logs import logs_bp
 from app.routes.settings import settings_bp
 from app.websockets.routes import ws_bp
@@ -34,6 +35,7 @@ def create_main_app():
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(logs_bp)
     app.register_blueprint(settings_bp)
+    app.register_blueprint(journal_bp)
 
     @app.before_request
     async def require_login():
